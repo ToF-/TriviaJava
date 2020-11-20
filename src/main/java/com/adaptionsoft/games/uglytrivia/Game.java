@@ -6,17 +6,12 @@ import java.util.LinkedList;
 public class Game {
 	Console console;
 
-    ArrayList playerNames = new ArrayList();
-    int[] purses  = new int[6];
-    boolean[] inPenaltyBox  = new boolean[6];
-
     LinkedList popQuestions = new LinkedList();
     LinkedList scienceQuestions = new LinkedList();
     LinkedList sportsQuestions = new LinkedList();
     LinkedList rockQuestions = new LinkedList();
 
     int currentPlayerIndex = 0;
-    boolean isGettingOutOfPenaltyBox;
 
 	public Player currentPlayer;
 	private ArrayList<Player> players = new ArrayList<Player>();
@@ -41,129 +36,121 @@ public class Game {
 	}
 
 	public boolean add(String playerName) {
-	    playerNames.add(playerName);
-	    purses[howManyPlayers()] = 0;
-	    inPenaltyBox[howManyPlayers()] = false;
-	    Player player = new Player(playerName);
-	    player.location = 0;
-	    players.add(player);
-
-	    console.print(playerName + " was added");
-	    console.print("They are player number " + playerNames.size());
+	    players.add(new Player(playerName));
+		addingPlayer(playerName, players.size());
 		return true;
 	}
 
+	private void addingPlayer(String playerName, int playerCount) {
+		console.print(playerName + " was added");
+		console.print("They are player number " + playerCount);
+	}
+
 	public int howManyPlayers() {
-		return playerNames.size();
+		return players.size();
 	}
 
 	public void action(int roll) {
 		currentPlayer = players.get(currentPlayerIndex);
-		console.print(currentPlayer.getPlayerName() + " is the current player");
-		console.print("They have rolled a " + roll);
+		currentPlayerRoll(currentPlayer, roll);
 
-		if (inPenaltyBox[currentPlayerIndex]) {
+		if (currentPlayer.isInPenaltyBox) {
 			if (roll % 2 != 0) {
-				isGettingOutOfPenaltyBox = true;
-
-				console.print(playerNames.get(currentPlayerIndex) + " is getting out of the penalty box");
-				currentPlayer.location = currentPlayer.location + roll;
-				if (currentPlayer.location > 11) currentPlayer.location = currentPlayer.location - 12;
-
-				console.print(currentPlayer.getPlayerName()
-						+ "'s new location is "
-						+ currentPlayer.location);
-				console.print("The category is " + currentCategory());
-				askQuestion();
+				currentPlayer.isGettingOutOfPenaltyBox = true;
+				gettingOutOfPenaltyBox(currentPlayer);
+				updateLocationAndAskQuestion(roll);
 			} else {
-				console.print(playerNames.get(currentPlayerIndex) + " is not getting out of the penalty box");
-				isGettingOutOfPenaltyBox = false;
-				}
-
+				notGettingOutOfPenaltyBox(currentPlayer);
+				currentPlayer.isGettingOutOfPenaltyBox = false;
+			}
 		} else {
-
-			currentPlayer.location = currentPlayer.location + roll;
-			if (currentPlayer.location > 11) currentPlayer.location = currentPlayer.location - 12;
-
-
-			console.print(currentPlayer.getPlayerName()
-					+ "'s new location is "
-					+ currentPlayer.location);
-			console.print("The category is " + currentCategory());
-			askQuestion();
+			updateLocationAndAskQuestion(roll);
 		}
+	}
 
+	private void currentPlayerRoll(Player player, int roll) {
+		console.print(player.getPlayerName() + " is the current player");
+		console.print("They have rolled a " + roll);
+	}
+
+	private void gettingOutOfPenaltyBox(Player player) {
+		console.print(player.getPlayerName() + " is getting out of the penalty box");
+	}
+	private void notGettingOutOfPenaltyBox(Player player) {
+		console.print(player.getPlayerName() + " is not getting out of the penalty box");
+	}
+
+	private void playerChangeLocation(Player player) {
+		console.print(player.getPlayerName() + "'s new location is " + player.location);
+		console.print("The category is " + getCategory(player.location));
+	}
+
+	private void updateLocationAndAskQuestion(int roll) {
+		currentPlayer.updateLocation(roll);
+		playerChangeLocation(currentPlayer);
+		askQuestion();
 	}
 
 	private void askQuestion() {
-		if (currentCategory() == "Pop")
+		if (getCategory(currentPlayer.location) == "Pop")
 			console.print(popQuestions.removeFirst());
-		if (currentCategory() == "Science")
+		if (getCategory(currentPlayer.location) == "Science")
 			console.print(scienceQuestions.removeFirst());
-		if (currentCategory() == "Sports")
+		if (getCategory(currentPlayer.location) == "Sports")
 			console.print(sportsQuestions.removeFirst());
-		if (currentCategory() == "Rock")
+		if (getCategory(currentPlayer.location) == "Rock")
 			console.print(rockQuestions.removeFirst());
 	}
 
 
-	private String currentCategory() {
+	private String getCategory(int location) {
 		String[] categories = {"Pop", "Science", "Sports", "Rock" };
-		return categories[currentPlayer.location % 4];
+		return categories[location % 4];
 	}
 
 	public boolean wasCorrectlyAnswered() {
-		if (inPenaltyBox[currentPlayerIndex]){
-			if (isGettingOutOfPenaltyBox) {
-				console.print("Answer was correct!!!!");
-				purses[currentPlayerIndex]++;
-				console.print(playerNames.get(currentPlayerIndex)
-						+ " now has "
-						+ purses[currentPlayerIndex]
-						+ " Gold Coins.");
-
-				boolean winner = didPlayerWin();
+		if (currentPlayer.isInPenaltyBox){
+			if (currentPlayer.isGettingOutOfPenaltyBox) {
+				currentPlayer.purse++;
+				correctAnswered(currentPlayer);
+				boolean notWinning = playerNotWinning();
 				currentPlayerIndex++;
-				if (currentPlayerIndex == playerNames.size()) currentPlayerIndex = 0;
+				if (currentPlayerIndex == players.size()) currentPlayerIndex = 0;
 
-				return winner;
+				return notWinning;
 			} else {
 				currentPlayerIndex++;
-				if (currentPlayerIndex == playerNames.size()) currentPlayerIndex = 0;
+				if (currentPlayerIndex == players.size()) currentPlayerIndex = 0;
 				return true;
 			}
 
-
-
 		} else {
-
-			console.print("Answer was corrent!!!!");
-			purses[currentPlayerIndex]++;
-			console.print(playerNames.get(currentPlayerIndex)
-					+ " now has "
-					+ purses[currentPlayerIndex]
-					+ " Gold Coins.");
-
-			boolean winner = didPlayerWin();
+			currentPlayer.purse++;
+			correctAnswered(currentPlayer);
+			boolean notWinning = playerNotWinning();
 			currentPlayerIndex++;
-			if (currentPlayerIndex == playerNames.size()) currentPlayerIndex = 0;
+			if (currentPlayerIndex == players.size()) currentPlayerIndex = 0;
 
-			return winner;
+			return notWinning;
 		}
+	}
+
+	private void correctAnswered(Player player) {
+		console.print("Answer was correct!!!!");
+		console.print(player.getPlayerName() + " now has " + currentPlayer.purse + " Gold Coins.");
 	}
 
 	public boolean wrongAnswer(){
 		console.print("Question was incorrectly answered");
-		console.print(playerNames.get(currentPlayerIndex)+ " was sent to the penalty box");
-		inPenaltyBox[currentPlayerIndex] = true;
+		console.print(currentPlayer.getPlayerName()+ " was sent to the penalty box");
+		this.currentPlayer.isInPenaltyBox = true;
 
 		currentPlayerIndex++;
-		if (currentPlayerIndex == playerNames.size()) currentPlayerIndex = 0;
+		if (currentPlayerIndex == players.size()) currentPlayerIndex = 0;
 		return true;
 	}
 
-
-	private boolean didPlayerWin() {
-		return !(purses[currentPlayerIndex] == 6);
+	private boolean playerNotWinning() {
+		return !(currentPlayer.purse == 6);
 	}
 }

@@ -37,25 +37,28 @@ public class GameTest {
 	}
 
 	@Test
-	public void WhenActionThenCurrentPlayerNewLocationIsDisplayed() {
+	public void WhenActionThenCurrentPlayerNewLocationIsChanged() {
 		// When
 		game.action(5);
 		// Then
-		Mockito.verify(console).print("Player1's new location is 5");
-		Assert.assertEquals("Player1", game.currentPlayer.getPlayerName());
 		Assert.assertEquals(5, game.currentPlayer.location);
+
+		//When
+		game.action(3);
+		// Then
+		Assert.assertEquals(8, game.currentPlayer.location);
 	}
 
 	@Test
 	public void GivenPlayerIsInPenaltyBoxWhenDiceIsOddThenPlayerGetsOut() {
 		// Given
+		game.action(1);
 		game.wrongAnswer();
-		Mockito.verify(console).print("Player1 was sent to the penalty box");
+		Assert.assertEquals(true, game.currentPlayer.isInPenaltyBox);
 		// When
 		game.action(5);
 		// Then
-		Mockito.verify(console).print("Player1 is getting out of the penalty box");
-		Mockito.verify(console).print("Player1's new location is 5");
+		Assert.assertEquals(true, game.currentPlayer.isGettingOutOfPenaltyBox);
 	}
 
 	@Test
@@ -87,5 +90,12 @@ public class GameTest {
 		game.action(1);
 		// Then
 		Mockito.verify(console).print("The category is Pop");
+	}
+
+	@Test
+	public void WhenPlayerAnswerCorrectlyThenPlayerEarnsGoldCoins(){
+		game.action(1);
+		game.wasCorrectlyAnswered();
+		Mockito.verify(console).print("Player1 now has 1 Gold Coins.");
 	}
 }
