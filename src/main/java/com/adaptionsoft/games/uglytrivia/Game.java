@@ -1,15 +1,10 @@
 package com.adaptionsoft.games.uglytrivia;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 public class Game {
 	View view;
-
-    LinkedList popQuestions = new LinkedList();
-    LinkedList scienceQuestions = new LinkedList();
-    LinkedList sportsQuestions = new LinkedList();
-    LinkedList rockQuestions = new LinkedList();
+	Question question;
 
     int currentPlayerIndex = 0;
 
@@ -18,17 +13,9 @@ public class Game {
 
 	public  Game(Console console){
     	this.view = new View(console);
+    	this.question = new Question();
 
-    	for (int i = 0; i < 50; i++) {
-			popQuestions.addLast("Pop Question " + i);
-			scienceQuestions.addLast(("Science Question " + i));
-			sportsQuestions.addLast(("Sports Question " + i));
-			rockQuestions.addLast(createRockQuestion(i));
-    	}
-    }
-
-	public String createRockQuestion(int index){
-		return "Rock Question " + index;
+    	question.initialize();
 	}
 
 	public boolean isPlayable() {
@@ -70,14 +57,8 @@ public class Game {
 	}
 
 	private void askQuestion() {
-		if (getCategory(currentPlayer.location) == "Pop")
-			view.questionNumber(popQuestions.removeFirst());
-		if (getCategory(currentPlayer.location) == "Science")
-			view.questionNumber(scienceQuestions.removeFirst());
-		if (getCategory(currentPlayer.location) == "Sports")
-			view.questionNumber(sportsQuestions.removeFirst());
-		if (getCategory(currentPlayer.location) == "Rock")
-			view.questionNumber(rockQuestions.removeFirst());
+		String nextQuestion = question.getNextQuestion(getCategory(currentPlayer.location));
+		view.questionNumber(nextQuestion);
 	}
 
 
