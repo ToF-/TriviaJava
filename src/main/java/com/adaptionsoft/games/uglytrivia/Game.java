@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class Game {
-	Console console;
+	View view;
 
     LinkedList popQuestions = new LinkedList();
     LinkedList scienceQuestions = new LinkedList();
@@ -17,7 +17,7 @@ public class Game {
 	private ArrayList<Player> players = new ArrayList<Player>();
 
 	public  Game(Console console){
-    	this.console = console;
+    	this.view = new View(console);
 
     	for (int i = 0; i < 50; i++) {
 			popQuestions.addLast("Pop Question " + i);
@@ -37,13 +37,8 @@ public class Game {
 
 	public boolean add(String playerName) {
 	    players.add(new Player(playerName));
-		addingPlayer(playerName, players.size());
+		view.addingPlayer(playerName, players.size());
 		return true;
-	}
-
-	private void addingPlayer(String playerName, int playerCount) {
-		console.print(playerName + " was added");
-		console.print("They are player number " + playerCount);
 	}
 
 	public int howManyPlayers() {
@@ -52,15 +47,15 @@ public class Game {
 
 	public void action(int roll) {
 		currentPlayer = players.get(currentPlayerIndex);
-		currentPlayerRoll(currentPlayer, roll);
+		view.currentPlayerRoll(currentPlayer, roll);
 
 		if (currentPlayer.isInPenaltyBox) {
 			if (roll % 2 != 0) {
 				currentPlayer.isGettingOutOfPenaltyBox = true;
-				gettingOutOfPenaltyBox(currentPlayer);
+				view.gettingOutOfPenaltyBox(currentPlayer);
 				updateLocationAndAskQuestion(roll);
 			} else {
-				notGettingOutOfPenaltyBox(currentPlayer);
+				view.notGettingOutOfPenaltyBox(currentPlayer);
 				currentPlayer.isGettingOutOfPenaltyBox = false;
 			}
 		} else {
@@ -68,38 +63,21 @@ public class Game {
 		}
 	}
 
-	private void currentPlayerRoll(Player player, int roll) {
-		console.print(player.getPlayerName() + " is the current player");
-		console.print("They have rolled a " + roll);
-	}
-
-	private void gettingOutOfPenaltyBox(Player player) {
-		console.print(player.getPlayerName() + " is getting out of the penalty box");
-	}
-	private void notGettingOutOfPenaltyBox(Player player) {
-		console.print(player.getPlayerName() + " is not getting out of the penalty box");
-	}
-
-	private void playerChangeLocation(Player player) {
-		console.print(player.getPlayerName() + "'s new location is " + player.location);
-		console.print("The category is " + getCategory(player.location));
-	}
-
 	private void updateLocationAndAskQuestion(int roll) {
 		currentPlayer.updateLocation(roll);
-		playerChangeLocation(currentPlayer);
+		view.playerChangeLocation(currentPlayer, getCategory(currentPlayer.location));
 		askQuestion();
 	}
 
 	private void askQuestion() {
 		if (getCategory(currentPlayer.location) == "Pop")
-			console.print(popQuestions.removeFirst());
+			view.questionNumber(popQuestions.removeFirst());
 		if (getCategory(currentPlayer.location) == "Science")
-			console.print(scienceQuestions.removeFirst());
+			view.questionNumber(scienceQuestions.removeFirst());
 		if (getCategory(currentPlayer.location) == "Sports")
-			console.print(sportsQuestions.removeFirst());
+			view.questionNumber(sportsQuestions.removeFirst());
 		if (getCategory(currentPlayer.location) == "Rock")
-			console.print(rockQuestions.removeFirst());
+			view.questionNumber(rockQuestions.removeFirst());
 	}
 
 
@@ -112,7 +90,7 @@ public class Game {
 		if (currentPlayer.isInPenaltyBox){
 			if (currentPlayer.isGettingOutOfPenaltyBox) {
 				currentPlayer.purse++;
-				correctAnswered(currentPlayer);
+				view.correctAnswered(currentPlayer);
 				boolean notWinning = playerNotWinning();
 				currentPlayerIndex++;
 				if (currentPlayerIndex == players.size()) currentPlayerIndex = 0;
@@ -126,7 +104,7 @@ public class Game {
 
 		} else {
 			currentPlayer.purse++;
-			correctAnswered(currentPlayer);
+			view.correctAnswered(currentPlayer);
 			boolean notWinning = playerNotWinning();
 			currentPlayerIndex++;
 			if (currentPlayerIndex == players.size()) currentPlayerIndex = 0;
@@ -135,14 +113,8 @@ public class Game {
 		}
 	}
 
-	private void correctAnswered(Player player) {
-		console.print("Answer was correct!!!!");
-		console.print(player.getPlayerName() + " now has " + currentPlayer.purse + " Gold Coins.");
-	}
-
 	public boolean wrongAnswer(){
-		console.print("Question was incorrectly answered");
-		console.print(currentPlayer.getPlayerName()+ " was sent to the penalty box");
+		view.incorrectAnswered(currentPlayer);
 		this.currentPlayer.isInPenaltyBox = true;
 
 		currentPlayerIndex++;
