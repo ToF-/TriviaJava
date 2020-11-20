@@ -1,5 +1,6 @@
 package com.adaptionsoft.games.trivia;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -32,6 +33,7 @@ public class GameTest {
 		// Then
 		Mockito.verify(console).print("Player1 is the current player");
 		Mockito.verify(console).print("They have rolled a 5");
+		Assert.assertEquals("Player1", game.currentPlayer.getPlayerName());
 	}
 
 	@Test
@@ -40,6 +42,8 @@ public class GameTest {
 		game.action(5);
 		// Then
 		Mockito.verify(console).print("Player1's new location is 5");
+		Assert.assertEquals("Player1", game.currentPlayer.getPlayerName());
+		Assert.assertEquals(5, game.currentPlayer.location);
 	}
 
 	@Test
@@ -52,5 +56,36 @@ public class GameTest {
 		// Then
 		Mockito.verify(console).print("Player1 is getting out of the penalty box");
 		Mockito.verify(console).print("Player1's new location is 5");
+	}
+
+	@Test
+	public void InitialWhenActionIs5ThenCurrentCategoryIsScience() {
+		// When
+		game.action(5);
+		// Then
+		Mockito.verify(console).print("The category is Science");
+	}
+
+	@Test
+	public void WhenCurrentPlayerMoveCategoryChanged() {
+		// When
+		game.action(1);
+		// Then
+		Mockito.verify(console).print("The category is Science");
+
+		// When
+		game.action(1);
+		// Then
+		Mockito.verify(console).print("The category is Sports");
+
+		// When
+		game.action(1);
+		// Then
+		Mockito.verify(console).print("The category is Rock");
+
+		// When
+		game.action(1);
+		// Then
+		Mockito.verify(console).print("The category is Pop");
 	}
 }

@@ -7,7 +7,6 @@ public class Game {
 	Console console;
 
     ArrayList playerNames = new ArrayList();
-    int[] places = new int[6];
     int[] purses  = new int[6];
     boolean[] inPenaltyBox  = new boolean[6];
 
@@ -19,7 +18,7 @@ public class Game {
     int currentPlayerIndex = 0;
     boolean isGettingOutOfPenaltyBox;
 
-	private Player currentPlayer;
+	public Player currentPlayer;
 	private ArrayList<Player> players = new ArrayList<Player>();
 
 	public  Game(Console console){
@@ -42,14 +41,12 @@ public class Game {
 	}
 
 	public boolean add(String playerName) {
-
-
 	    playerNames.add(playerName);
-	    places[howManyPlayers()] = 0;
 	    purses[howManyPlayers()] = 0;
 	    inPenaltyBox[howManyPlayers()] = false;
-
-	    players.add(new Player(playerName));
+	    Player player = new Player(playerName);
+	    player.location = 0;
+	    players.add(player);
 
 	    console.print(playerName + " was added");
 	    console.print("They are player number " + playerNames.size());
@@ -62,7 +59,7 @@ public class Game {
 
 	public void action(int roll) {
 		currentPlayer = players.get(currentPlayerIndex);
-		console.print(currentPlayer.playerName + " is the current player");
+		console.print(currentPlayer.getPlayerName() + " is the current player");
 		console.print("They have rolled a " + roll);
 
 		if (inPenaltyBox[currentPlayerIndex]) {
@@ -72,10 +69,8 @@ public class Game {
 				console.print(playerNames.get(currentPlayerIndex) + " is getting out of the penalty box");
 				currentPlayer.location = currentPlayer.location + roll;
 				if (currentPlayer.location > 11) currentPlayer.location = currentPlayer.location - 12;
-				places[currentPlayerIndex] = places[currentPlayerIndex] + roll;
-				if (places[currentPlayerIndex] > 11) places[currentPlayerIndex] = places[currentPlayerIndex] - 12;
 
-				console.print(currentPlayer.playerName
+				console.print(currentPlayer.getPlayerName()
 						+ "'s new location is "
 						+ currentPlayer.location);
 				console.print("The category is " + currentCategory());
@@ -89,10 +84,9 @@ public class Game {
 
 			currentPlayer.location = currentPlayer.location + roll;
 			if (currentPlayer.location > 11) currentPlayer.location = currentPlayer.location - 12;
-			places[currentPlayerIndex] = places[currentPlayerIndex] + roll;
-			if (places[currentPlayerIndex] > 11) places[currentPlayerIndex] = places[currentPlayerIndex] - 12;
 
-			console.print(currentPlayer.playerName
+
+			console.print(currentPlayer.getPlayerName()
 					+ "'s new location is "
 					+ currentPlayer.location);
 			console.print("The category is " + currentCategory());
@@ -114,16 +108,8 @@ public class Game {
 
 
 	private String currentCategory() {
-		if (places[currentPlayerIndex] == 0) return "Pop";
-		if (places[currentPlayerIndex] == 4) return "Pop";
-		if (places[currentPlayerIndex] == 8) return "Pop";
-		if (places[currentPlayerIndex] == 1) return "Science";
-		if (places[currentPlayerIndex] == 5) return "Science";
-		if (places[currentPlayerIndex] == 9) return "Science";
-		if (places[currentPlayerIndex] == 2) return "Sports";
-		if (places[currentPlayerIndex] == 6) return "Sports";
-		if (places[currentPlayerIndex] == 10) return "Sports";
-		return "Rock";
+		String[] categories = {"Pop", "Science", "Sports", "Rock" };
+		return categories[currentPlayer.location % 4];
 	}
 
 	public boolean wasCorrectlyAnswered() {
